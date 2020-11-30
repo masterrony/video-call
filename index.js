@@ -1,13 +1,18 @@
 const express = require('express')
+const fs = require('fs')
 const http = require('http')
 const { ExpressPeerServer } = require('peer')
 
 
-
 const app = express()
 const server = http.createServer(app)
+const ssl = {
+  key: fs.readFileSync('key/server.key'),
+  cert: fs.readFileSync('key/server.crt')
+}
 const peerServer = ExpressPeerServer(server, {
   debug: true,
+  ssl,
   path: '/myapp'
 })
 let clients = {}
