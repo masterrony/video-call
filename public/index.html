@@ -1,0 +1,75 @@
+<html>
+
+<head>
+  <script src="https://unpkg.com/peerjs@1.3.1/dist/peerjs.min.js"></script>
+  <style>
+    video {
+      width: 500px;
+      height: 500px;
+    }
+  </style>
+</head>
+
+<body>
+  <input type='text' id='input-id'>
+  <button id='btn-enable'>Enable Me</button>
+  <br>
+  <input type='text' id='input-peer-id'>
+  <button id='btn-connect'>Connect</button>
+  <div>
+    <video id='peer-video' autoplay></video>
+  </div>
+  <script>
+    const btnEnable = document.querySelector('#btn-enable')
+    const btnConnect = document.querySelector('#btn-connect')
+    const getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+    const videoPlayer = document.getElementById('peer-video')
+    let peer = null
+    let conn = null
+
+    btnEnable.addEventListener('click', () => {
+      const selfId = document.getElementById('input-id').value
+
+      if (!selfId) return
+
+      // getUserMedia({ video: true, audio: false}, stream => {
+      //   // console.log('stream', stream)
+      //   // videoPlayer.srcObject = stream
+      // }, err => {
+      //   console.log('failed', err)
+      // })
+
+      peer = new Peer(selfId, {
+        host: 'localhost',
+        port: '9000',
+        path: '/peerjs/myapp'
+      })
+
+      peer.on('call', call => {
+        console.log('calling', call)
+        getUserMedia({ video: true, audio: false }, stream => {
+          call.answer(stream)
+        })
+      })
+    })
+
+    btnConnect.addEventListener('click', () => {
+      const peerId = document.getElementById('input-peer-id').value
+
+      if (!peerId || !peer) return
+
+      getUserMedia({ video: true, audio: false }, stream => {
+        const call = peer.call(peerId, stream)
+        console.log('call peer', stream)
+        call.on('stream', remoteStream => {
+          console.log('remotestream', remoteStream)
+          videoPlayer.srcObject = remoteStream
+        })
+      }, err => {
+        console.log('remote failed', err)
+      })
+    })
+  </script>
+</body>
+
+</html>
