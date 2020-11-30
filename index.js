@@ -20,4 +20,6 @@ peerServer.on('connection', client => {
   console.log('clients', clients)
 })
 
-server.listen(9000, () => console.log('server running on 9000'))
+const PORT = process.env.PORT || 9000
+
+server.listen(PORT, () => console.log(`server running on ${PORT}`))
